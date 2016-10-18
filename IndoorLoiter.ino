@@ -86,7 +86,7 @@ void loop()
   
   if (status == POZYX_SUCCESS) {
     // print out the result
-    if (ENABLE_PROCESSING) {
+    if (!ENABLE_PROCESSING) {
       printCoordinates(position);
     } else {
       printCoordinatesProcessing(position);
