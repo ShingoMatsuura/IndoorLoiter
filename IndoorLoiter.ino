@@ -4,8 +4,8 @@
 #include <Pozyx.h>
 #include <Pozyx_definitions.h>
 
-/*//#include <mavlink.h>*/
-#include "C:\Users\rmackay9\Documents\GitHub\ardupilot\Build.ArduCopter\libraries\GCS_MAVLink\include\mavlink\v2.0\common\mavlink.h"
+#include <mavlink.h>
+/*#include "C:\Users\rmackay9\Documents\GitHub\ardupilot\Build.ArduCopter\libraries\GCS_MAVLink\include\mavlink\v2.0\common\mavlink.h"*/
 #include <SoftwareSerial.h>
 #include <Wire.h>
 /*#include <Time.h> // download from https://github.com/PaulStoffregen/Time */
@@ -14,6 +14,7 @@
 ////////////////// Pozyx Prams //////////////////////////////
 
 #define NUM_ANCHORS 4
+#define ENABLE_PROCESSING 1
 // the network id of the anchors: change these to the network ids of your anchors.
 uint16_t anchors[4] = { 0x601C, // (0,0)
                         0x6020, // x-axis
@@ -85,8 +86,12 @@ void loop()
   
   if (status == POZYX_SUCCESS) {
     // print out the result
-    printCoordinates(position);
-
+    if (ENABLE_PROCESSING) {
+      printCoordinates(position);
+    } else {
+      printCoordinatesProcessing(position);
+    }
+    
     // send GPS MAVLINK message
     SendGPSMAVLinkMessage(position);
   } else {
@@ -113,6 +118,51 @@ void printCoordinates(coordinates_t coor)
   Serial.print(longitude);
   print_tab();
   Serial.println(); 
+}
+
+// function to print out positoining data + ranges for the processing sketch
+void printCoordinatesProcessing(coordinates_t coor){
+  
+  // get the network id and print it
+  uint16_t network_id;
+  Pozyx.getNetworkId(&network_id);
+  
+  Serial.print("POS,0x");
+  Serial.print(network_id,HEX);
+  Serial.print(",");
+  Serial.print(coor.x);
+  Serial.print(",");
+  Serial.print(coor.y);
+  Serial.print(",");
+  Serial.print(coor.z);
+  Serial.print(",");
+  
+  // get information about the positioning error and print it
+  pos_error_t pos_error;
+  Pozyx.getPositionError(&pos_error);
+    
+  Serial.print(pos_error.x);
+  Serial.print(",");
+  Serial.print(pos_error.y);
+  Serial.print(",");
+  Serial.print(pos_error.z);
+  Serial.print(",");
+  Serial.print(pos_error.xy);
+  Serial.print(",");
+  Serial.print(pos_error.xz);
+  Serial.print(",");
+  Serial.print(pos_error.yz); 
+  
+  // read out the ranges to each anchor and print it 
+  for (int i=0; i < NUM_ANCHORS; i++){
+    device_range_t range;
+    Pozyx.getDeviceRangeInfo(anchors[i], &range);
+    Serial.print(",");
+    Serial.print(range.distance);  
+    Serial.print(",");
+    Serial.print(range.RSS); 
+  }
+  Serial.println();
 }
 
 void print_comma()
