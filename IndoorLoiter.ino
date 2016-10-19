@@ -16,10 +16,10 @@
 #define NUM_ANCHORS 4
 #define ENABLE_PROCESSING 1
 // the network id of the anchors: change these to the network ids of your anchors.
-uint16_t anchors[4] = { 0x601C, // (0,0)
-                        0x6020, // x-axis
-                        0x6057, // y-axis
-                        0x605E};     
+uint16_t anchors[4] = { 0x6003, // (0,0)
+                        0x6013, // x-axis
+                        0x6029, // y-axis
+                        0x6045};     
 
 // only required for manual anchor calibration. 
 // Please change this to the coordinates measured for the anchors
